@@ -7,7 +7,8 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
 		return window.location.protocol == 'https:' ? 'https://' : 'http://';
 	}
 	var TRASH_R = ['$$$####!!!!!!!', '^^^^^^##@', '@!^^!@#@@$$$$$', '^^#@@!!@#!$', '@#!@@@##$$@@'];
-	var version_modss = '3.0', API = 'https://api.lampa.stream/', type = '', jackets = {}, cards, ping_auth, manifest, menu_list = [], vip = false, leftVipD = '', user_id = '', uid = '3cd26a8132842c8ee74bfe73d0ff3bbb', IP, logged = false;
+	// UI edition: plain balancer names; provider authorization is unchanged.
+	var version_modss = '3.0-ui.1', API = 'https://api.lampa.stream/', type = '', jackets = {}, cards, ping_auth, manifest, menu_list = [], user_id = '', uid = '3cd26a8132842c8ee74bfe73d0ff3bbb', IP;
 	console.log('App', 'protocol:', Protocol());
 	
 	var Modss = {
@@ -19,14 +20,6 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
 			ForkTV.init();
 			this.radio();
 			this.snow();
-			Lampa.Settings.main().render().find('[data-component="plugins"]').unbind('hover:enter').on('hover:enter', function () {
-        Lampa.Extensions.show();
-        setTimeout(function (){
-          $('.extensions__item-author', Lampa.Extensions.render()).map(function (i, e){
-            if(e.textContent == '@modss_group') $(e).html('💎').append('<span class="extensions__item-premium">VIP buy at @modssmy_bot</span>');
-          });
-        }, 500);
-      });
       if (Lampa.Storage.field('mods_tv_butt_ch')) Lampa.Keypad.listener.follow('keydown', function (e) {
     		var next = (e.code == 427 || e.code == 33 || e.code == 39);
     		var prev = (e.code == 428 || e.code == 34 || e.code == 37);
@@ -51,22 +44,8 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
   			};
   		}
   		if(!IP) this.getIp();
-  		var ads_4k = ['<div style="padding: 1.5em 2em; padding-top: 0;">', '<div style="background: #3e3e3e; padding: 1em; border-radius: 0.3em;">', '<div style="line-height: 1.4;">Надоело смотреть в плохом качестве?<br>Хочешь смотреть в FHD и 4K? Переходи в телеграм бот <span style="color: #24b4f9">@modssmy_bot</span> для подключения VIP</div>', '</div>', '</div>'].join('');
-    	Lampa.Controller.listener.follow('toggle', function(e) {
-    		if(e.name == 'select' && !vip) {
-    			setTimeout(function() {
-    				if($('.selectbox .scroll__body div:eq(0)').html().indexOf('.land') >= 0)
-					  $('.selectbox .scroll__body div:eq(0)').remove();
-    				if($('.selectbox .selectbox-item__icon svg').length && Lampa.Activity.active().component == 'full') $('.selectbox .scroll__body').prepend($(ads_4k));
-    			}, 10);
-    		}
-    	});
     	var mynotice = new Lampa.NoticeClassLampa({name: 'Modss',db_name: 'notice_modss'});
       Lampa.Notice.addClass('modss', mynotice);
-      if(Lampa.Storage.get('showModssVip', false) && leftVipD && vip && logged) setTimeout(function (){
-        Modss.showModssVip();
-        Lampa.Storage.set('showModssVip', false);
-      }, 2000);
 		},
 		snow: function () {
 		  $(document).snowfall(Lampa.Storage.field('mods_snow') == true ? {
@@ -110,27 +89,10 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
 
       Lampa.Params.select('source', sources, 'tmdb');
 		},
-		showModssVip: function () {
-      var enabled = Lampa.Controller.enabled().name;
-      Lampa.Modal.open({
-        title: '',
-        html: Lampa.Template.get('cub_premium'),
-        onBack: function onBack() {
-          Lampa.Modal.close();
-          Lampa.Controller.toggle(enabled);
-        }
-      });
-      Lampa.Modal.render().find('.cub-premium__title').text("MODS's VIP");
-      Lampa.Modal.render().find('.cub-premium__descr:eq(0)').text('Поздравляем вас с получением VIP-статуса! Теперь у вас есть возможность наслаждаться видео в высоком разрешении 4К. Кроме того, вас ожидают дополнительные балансеры, которые помогут найти подходящий контент');
-      Lampa.Modal.render().find('.cub-premium__descr:eq(1)').text('У вас осталось ' + leftVipD);
-      Lampa.Modal.render().find('.cub-premium__descr:eq(1)').after('👇 Кнопка для просмотра 👇<br><br><img src="https://lampa.stream/but_modss.jpg">');
-      Lampa.Modal.render().find('.cub-premium__url').text('@modssmy_bot');
-      Lampa.Modal.render().addClass('modal--cub-premium').find('.modal__content').before('<div class="modal__icon"><svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 32 32"><path d="m2.837 20.977q-.912-5.931-1.825-11.862a.99.99 0 0 1 1.572-.942l5.686 4.264a1.358 1.358 0 0 0 1.945-.333l4.734-7.104a1.263 1.263 0 0 1 2.1 0l4.734 7.1a1.358 1.358 0 0 0 1.945.333l5.686-4.264a.99.99 0 0 1 1.572.942q-.913 5.931-1.825 11.862z" fill="#D8C39A"></svg></div>');
-    },
 		online: function (back) {
 		  var params = {
       	url: '',
-      	title: Lampa.Lang.translate('modss_title_online') + " MODS's " + leftVipD,
+        title: Lampa.Lang.translate('modss_title_online') + " MODS's",
       	component: 'modss_online',
       	search: cards.title,
       	search_one: cards.title,
@@ -181,7 +143,7 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
 		  
 			var loader = '<svg class="modss-balanser-loader" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="94px" height="94px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid"><circle cx="50" cy="50" fill="none" stroke="#ffffff" stroke-width="5" r="35" stroke-dasharray="164.93361431346415 56.97787143782138"><animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform></circle></svg>';
 			var ico = '<svg class="modss-online-icon" viewBox="0 0 32 32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 32 32"><path d="m17 14.5 4.2-4.5L4.9 1.2c-.1-.1-.3-.1-.6-.2L17 14.5zM23 21l5.9-3.2c.7-.4 1.1-1 1.1-1.8s-.4-1.5-1.1-1.8L23 11l-4.7 5 4.7 5zM2.4 1.9c-.3.3-.4.7-.4 1.1v26c0 .4.1.8.4 1.2L15.6 16 2.4 1.9zM17 17.5 4.3 31c.2 0 .4-.1.6-.2L21.2 22 17 17.5z" fill="currentColor" fill="#ffffff" class="fill-000000"></path></svg>';
-			var button = "<div data-subtitle='modss_v".concat(manifest.version, " (14 Balansers, 7 in vip)' class='full-start__button selector view--modss_online'>" +ico + "<span>"+this.title+"</span></div>");
+			var button = "<div data-subtitle='modss_v".concat(manifest.version, "' class='full-start__button selector view--modss_online'>" +ico + "<span>"+this.title+"</span></div>");
       var btn = $(Lampa.Lang.translate(button));
 			this.btn = btn;
 		//	if (Lampa.Storage.field('online_but_first')) Lampa.Storage.set('full_btn_priority', Lampa.Utils.hash(btn.clone().removeClass('focus').prop('outerHTML')));
@@ -397,14 +359,6 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
   				if(!card.kinopoisk_id && json.data && json.data.kp_id) card.kinopoisk_ID = json.data.kp_id;
   				var kp = json.data && json.data.kp_rating || 0;
   				var imdb = json.data && json.data.imdb_rating || 0;
-  				var auth = json.data.auth;
-  				vip = json.data.vip;
-  				if(json.data.leftDays) leftVipD = json.data.leftDays;
-  				if(!vip) Lampa.Storage.set('showModssVip', true);
-          if (logged !== auth) {
-  				  logged = auth;
-  				  window.location.reload();
-  				}
   				var kp_rating = !isNaN(kp) && kp !== null ? parseFloat(kp).toFixed(1) : '0.0';
   				var imdb_rating = !isNaN(imdb) && imdb !== null ? parseFloat(imdb).toFixed(1) : '0.0';
   				if (['filmix', 'pub'].indexOf(card.source) == -1 && Lampa.Storage.field('mods_rating')){
@@ -461,7 +415,27 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
       });
 		},
 		balansers: function() {
-		  var balansers = {"videocdn":"VideoCDN","collaps":"Collaps","kinobase":"Kinobase","filmix":"Filmix","cdnmovies":"CDNmovies","rezka":"Rezka","pub":"Pub 4K","hdr":"HDR MODS's [4K]","hdrezka":"HDRezka 4K","bazon":"Bazon 4K","qiwi":"VBMovies 4K","videodb":"VideoDB","zetflix":"Zetflix","uakino":"UAKino","eneida":"Eneida(Ukr)","kodik":"Kodik","anilibria":"Anilibria","hdvb":"HDVB","kinotochka":"KinoTochka"};
+		  var balansers = {
+        videocdn: 'VideoCDN',
+        collaps: 'Collaps',
+        kinobase: 'Kinobase',
+        filmix: 'Filmix',
+        cdnmovies: 'CDNmovies',
+        rezka: 'Rezka',
+        pub: 'Pub 4K',
+        hdr: "HDR MODS's [4K]",
+        hdrezka: 'HDRezka 4K',
+        bazon: 'Bazon 4K',
+        qiwi: 'VBMovies 4K',
+        videodb: 'VideoDB',
+        zetflix: 'Zetflix',
+        uakino: 'UAKino',
+        eneida: 'Eneida(Ukr)',
+        kodik: 'Kodik',
+        anilibria: 'Anilibria',
+        hdvb: 'HDVB',
+        kinotochka: 'KinoTochka'
+      };
       if (Lampa.Storage.get('pro_pub', false)) balansers = Object.assign({"pub":"Pub"}, balansers);
       return balansers;
     },
@@ -3934,9 +3908,9 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
           Lampa.Select.close();
           if (Lampa.Arrays.getKeys(sources).indexOf(a.source) !== -1) {
             if (!Lampa.Storage.get('pro_pub', false) && a.source == 'pub')
-            return Lampa.Noty.show('Доступно для VIP пользователей<br>Через бот @modssmy_bot');
+            return Lampa.Noty.show(Lampa.Lang.translate('modss_pub_access_required'));
             _this.changeBalanser(a.source);
-         } else Lampa.Noty.show('Доступно для VIP пользователей<br>Через бот @modssmy_bot');
+         } else Lampa.Noty.show(Lampa.Lang.translate('modss_source_missing'));
         }
         if (object.movie.number_of_seasons || balanser == 'pub' || balanser == 'bazon') filter.render().find('.filter--filter').show();
   		  else filter.render().find('.filter--filter').hide();
@@ -3945,7 +3919,7 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
       if (object.movie.number_of_seasons || balanser == 'pub' || balanser == 'bazon') filter.render().find('.filter--filter').show();
   	  else filter.render().find('.filter--filter').hide();
   	  filter.render().find('.filter--sort').on('hover:enter', function () {
-  			$('body').find('.selectbox__title').text(Lampa.Lang.translate('modss_balanser'));
+        $('body').find('.selectbox__title').text(Lampa.Lang.translate('modss_balancers_unmarked'));
   		});
   		if (filter.addButtonBack) filter.addButtonBack();
       filter.render().find('.filter--sort span').text(Lampa.Lang.translate('modss_balanser'));
@@ -4512,18 +4486,17 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
   		if (filter_items.order && filter_items.order.length) add('order', Lampa.Lang.translate('filter_series_order') + '');
   		
   		filter.set('filter', select);
-      filter.set('sort', filter_sources.map(function (e, i) {
-        var tpl = {
-				  title: balansers[e],
+      filter.set('sort', filter_sources.map(function (e) {
+        var hasAdapter = typeof sources[e] == 'function';
+        var needsPubAccess = e == 'pub' && !Lampa.Storage.get('pro_pub', false);
+        return {
+          title: balansers[e],
           source: e,
-          selected: e == balanser, 
-          ghost: i >= (Lampa.Storage.get('pro_pub', false) ? 7 : 6) ? true : false
+          selected: e == balanser,
+          ghost: !hasAdapter || needsPubAccess,
+          subtitle: !hasAdapter ? Lampa.Lang.translate('modss_source_missing') :
+            (needsPubAccess ? Lampa.Lang.translate('modss_pub_access_required') : '')
         };
-        if(i >= (Lampa.Storage.get('pro_pub', false) ? 7 : 6)) {
-          tpl.template = 'selectbox_icon';
-          tpl.icon = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="512" height="512" viewBox="0 0 401.998 401.998" xml:space="preserve"><path d="M357.45 190.721c-5.331-5.33-11.8-7.993-19.417-7.993h-9.131v-54.821c0-35.022-12.559-65.093-37.685-90.218C266.093 12.563 236.025 0 200.998 0c-35.026 0-65.1 12.563-90.222 37.688-25.126 25.126-37.685 55.196-37.685 90.219v54.821h-9.135c-7.611 0-14.084 2.663-19.414 7.993-5.33 5.326-7.994 11.799-7.994 19.417V374.59c0 7.611 2.665 14.086 7.994 19.417 5.33 5.325 11.803 7.991 19.414 7.991H338.04c7.617 0 14.085-2.663 19.417-7.991 5.325-5.331 7.994-11.806 7.994-19.417V210.135c.004-7.612-2.669-14.084-8.001-19.414zm-83.363-7.993H127.909v-54.821c0-20.175 7.139-37.402 21.414-51.675 14.277-14.275 31.501-21.411 51.678-21.411 20.179 0 37.399 7.135 51.677 21.411 14.271 14.272 21.409 31.5 21.409 51.675v54.821z" fill="currentColor"></path></svg>'
-        };
-        return tpl;
       }));
       
       this.selected(filter_items);
@@ -5094,7 +5067,7 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
         right: function right() {
           if (Navigator.canmove('right')) Navigator.move('right');
           else if (object.movie.number_of_seasons) filter.show(Lampa.Lang.translate('title_filter'), 'filter');
-  				else filter.show(Lampa.Lang.translate('modss_balanser'), 'sort');
+          else filter.show(Lampa.Lang.translate('modss_balancers_unmarked'), 'sort');
         },
         left: function left(){
           var poster = files.render().find('.explorer-card__head-img');
@@ -7002,6 +6975,26 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
     		uk: 'Балансер',
     		en: 'Balancer'
     	},
+      modss_balancers_unmarked: {
+        ru: 'Без отметки VIP',
+        uk: 'Без позначки VIP',
+        en: 'No VIP labels'
+      },
+      modss_source_missing: {
+        ru: 'Модуль этого источника отсутствует в данной сборке',
+        uk: 'Модуль цього джерела відсутній у цій збірці',
+        en: 'This source module is not included in this build'
+      },
+      modss_pub_access_required: {
+        ru: 'Для KinoPub требуется активная подписка и вход в его настройках',
+        uk: 'Для KinoPub потрібна активна підписка та вхід у його налаштуваннях',
+        en: 'KinoPub requires an active subscription and sign-in in its settings'
+      },
+      modss_balancers_access_note: {
+        ru: 'Общий список источников без VIP-меток. Условия доступа определяет каждый сервис.',
+        uk: 'Загальний список джерел без VIP-позначок. Умови доступу визначає кожен сервіс.',
+        en: 'One source list without VIP badges. Each service sets its access requirements.'
+      },
     	helper_online_file: {
     		ru: 'Удерживайте клавишу "ОК" для вызова контекстного меню',
     		uk: 'Утримуйте клавішу "ОК" для виклику контекстного меню',
@@ -7713,8 +7706,8 @@ Date.now||(Date.now=function(){return(new Date.getTime())}),function(){"use stri
 					type: 'title'
 				},
 				field: {
-					name: '<div class="settings-folder" style="padding:0!important"><div style="width:3em;height:2.3em;margin-top:-.5em;padding-right:.5em"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z"></path><path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm8 5.5v7h2v-7h-2zm-.285 0H8.601l-1.497 4.113L5.607 8.5H3.493l2.611 6.964h2L10.715 8.5zm5.285 5h1.5a2.5 2.5 0 1 0 0-5H14v7h2v-2zm0-2v-1h1.5a.5.5 0 1 1 0 1H16z" fill="#ffffff" class="fill-000000"></path></svg></div><div style="font-size:1.3em">Не подключён</div></div>',
-					description: 'Для активации <b style="color: #ffd402;">Vip</b> статуса перейдите в телеграм бот <span style="color: #24b4f9;">@modssmy_bot</span><br>По вопросам <span style="color: #24b4f9;">@modss_group</span>'
+          name: Lampa.Lang.translate('modss_balancers_unmarked'),
+          description: Lampa.Lang.translate('modss_balancers_access_note')
 				}
 			});
 			
